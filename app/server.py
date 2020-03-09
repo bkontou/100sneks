@@ -16,10 +16,10 @@ from copy import deepcopy as copy
 import numpy as np
 from collections import defaultdict
 
-import graph
-from graph import Loc
-import snake as snk
-from fsm import FSM
+import app.graph as graph
+from app.graph import Loc
+import app.snake as snk
+from app.fsm import FSM
 
 
 def to_loc_list(locs):
