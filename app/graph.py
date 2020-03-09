@@ -13,7 +13,7 @@ except:
 from copy import deepcopy as copy
 
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from collections import defaultdict
 
 
@@ -228,44 +228,7 @@ class Graph:
             self.edges[me.tail].remove(me.head)
         except:
             pass
-# =============================================================================
-#         for snake in D['board']['snakes']:
-#             if snake['id'] != me['id']:
-#                 head = Loc(snake['body'][0]['x'],snake['body'][0]['y'])
-#                 tail = Loc(snake['body'][len(snake['body']-1)]['x'],snake['body'][len(snake['body']-1)]['y'])
-# 
-#                 body =
-#                                 
-#                 
-#                 for l in range(len(snake['body'])-1):
-#                     point = snake['body'][l]
-#                     self.delete_node(Loc(point['x'],point['y']))
-#                 head = Loc(snake['body'][0]['x'],snake['body'][0]['y'])
-#                 self.delete_node(head+Loc(1,0))
-#                 self.delete_node(head-Loc(1,0))
-#                 self.delete_node(head+Loc(0,1))
-#                 self.delete_node(head-Loc(0,1))
-#                     
-#         if me['body'].count(me['body'][0]) == 1:
-#             for l in range(len(me['body'])-2):
-#                 point = me['body'][l+1]
-#                 self.delete_node(Loc(point['x'],point['y']))
-# =============================================================================
-        
-# =============================================================================
-#         for snake in D['board']['snakes']:
-#             if snake['id'] != me['id']:
-#                 point = snake['body'][len(snake['body'])-1]
-#                 self.add_node_plus_edges(Loc(point['x'],point['y']))
-#     
-#         point = me['body'][0]
-#         print(point)
-#         self.add_node_plus_edges(Loc(point['x'],point['y']))
-#         point = me['body'][len(me['body'])-1]
-#         print(point)
-#         self.add_node_plus_edges(Loc(point['x'],point['y']))
-#             
-# =============================================================================
+
     def floodfind(self, From, L, lis=False):
         Q = Queue.Queue()
         
@@ -376,14 +339,7 @@ class Graph:
                 openList.append(child)
         
     def _zero(self):
-# =============================================================================
-#          (x,y)
-#             w ->
-#         h[0,0 0,1 0,2 ...]
-#         |[1,0 1,1 1,2 ...]
-#         V[2,0 2,1 2,2 ...]
-#                ...
-# =============================================================================
+
         for w in range(self.width):
             for h in range(self.height):
                 self.add_node(Loc(w,h))
@@ -395,19 +351,21 @@ class Graph:
                 self.add_edge(N,N+Loc(0,1))
 
         
-    def _plot(self):
-        nlistx = []
-        nlisty = []
-        for N in self.nodes:
-            nlistx.append(N.x)
-            nlisty.append(self.height - N.y)
-            
-        for N in self.edges:
-            for E in self.edges[N]:
-                plt.plot([N.x,E.x],[self.height - N.y, self.height - E.y],c='b')
-                
-        
-        plt.scatter(nlistx,nlisty,c='b')
+# =============================================================================
+#     def _plot(self):
+#         nlistx = []
+#         nlisty = []
+#         for N in self.nodes:
+#             nlistx.append(N.x)
+#             nlisty.append(self.height - N.y)
+#             
+#         for N in self.edges:
+#             for E in self.edges[N]:
+#                 plt.plot([N.x,E.x],[self.height - N.y, self.height - E.y],c='b')
+#                 
+#         
+#         plt.scatter(nlistx,nlisty,c='b')
+# =============================================================================
 
         
     def __contains__(self,L):
