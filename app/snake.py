@@ -4,7 +4,7 @@ Created on Thu Mar  7 10:45:12 2019
 @author: bkontou
 """
 
-from graph import Loc
+from app.graph import Loc
 
 def to_loc_list(locs):
     loc_list = []
