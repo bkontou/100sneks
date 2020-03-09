@@ -38,6 +38,13 @@ def build_snakes(data, me_id='0'):
         
     return snakelist
 
+global dirs
+dirs = {Loc(-1,0):'left',Loc(0,1):'down',Loc(1,0):'right',Loc(0,-1):'up'}
+global H
+global W
+global G
+global finite_snake_machine
+
 
 @bottle.route("/")
 def index():
@@ -67,6 +74,8 @@ def start():
     global W
     global G
     global finite_snake_machine
+    
+    print(dirs)
     
     
     H, W = data["board"]["height"], data["board"]["width"]
@@ -103,6 +112,8 @@ def move():
     TODO: Using the data from the endpoint request object, your
             snake AI must choose a direction to move in.
     """
+    
+    print(dirs)
     
     me = snk.Snake(data['you'])
     snakes = build_snakes(data, me_id=me.id)
