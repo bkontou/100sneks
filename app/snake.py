@@ -4,7 +4,10 @@ Created on Thu Mar  7 10:45:12 2019
 @author: bkontou
 """
 
-from app.graph import Loc
+try:
+    from app.graph import Loc
+except:
+    from graph import Loc
 
 def to_loc_list(locs):
     loc_list = []
@@ -24,6 +27,8 @@ class Snake:
         self.head = self.body[0]
         self.tail = self.body[len(self.body)-1]
         self.head_direction = self.head - self.body[1]
+        
+        self.size = len(self.body)
     
     def __len__(self):
         return len(self.body)

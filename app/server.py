@@ -16,10 +16,16 @@ from copy import deepcopy as copy
 import numpy as np
 from collections import defaultdict
 
-import app.graph as graph
-from app.graph import Loc
-import app.snake as snk
-from app.fsm import FSM
+try:
+    import app.graph as graph
+    from app.graph import Loc
+    import app.snake as snk
+    from app.fsm import FSM
+except:
+    import graph as graph
+    from graph import Loc
+    import snake as snk
+    from fsm import FSM
 
 
 def to_loc_list(locs):
@@ -112,9 +118,7 @@ def move():
     TODO: Using the data from the endpoint request object, your
             snake AI must choose a direction to move in.
     """
-    
-    print(dirs)
-    
+        
     me = snk.Snake(data['you'])
     snakes = build_snakes(data, me_id=me.id)
     
@@ -123,25 +127,44 @@ def move():
     G = graph.Graph(H,W)
     G.build_from_data(snakes, me)
     
+    d = None
+    
     #approaching wall
-    if me.head + me.head_direction not in G:
-        #choose better path
-        #print("")
-        #print("%s %s %s" % (me.head, me.head_direction.rotate_90(), me.head_direction.rotate_90(clockwise=True)))
-        side1 = G.floodfill(me.head,me.head_direction.rotate_90())
-        side2 = G.floodfill(me.head,me.head_direction.rotate_90(clockwise=True))
-        #print("%s %s" % (side1,side2))
-        if side1 < side2:
-            #print("two")
+    forward = G.floodfill(me.head, me.head_direction)
+    left = G.floodfill(me.head,me.head_direction.rotate_90())
+    right = G.floodfill(me.head,me.head_direction.rotate_90(clockwise=True))
+    
+    for snake in snakes:
+        if me.head.square_dist(snake.head) == 2 and me.size > snake.size:
+            #we can go head to freakin head
+            d = G.Astar(me.head,snake.head)
+            move = dirs[d[1]-d[0]]
+            break
+        
+    #TODO: figure out how to get this to work: approaching wall shit
+    if right+left+forward < 3*me.size:
+        #go in direction of largest area
+        if right >= left and right >= forward:
             d = me.head_direction.rotate_90(clockwise=True)
-            #d.y = -d.y
             move = dirs[d]
-        else:
-            #print("one")
+        elif left >= right and left >= forward:
             d = me.head_direction.rotate_90()
-            #d.y = -d.y
+            move = dirs[d]
+        elif forward >= right and forward >= left:
+            d = me.head_direction
             move = dirs[d]
     else:
+        if right < me.size and left < me.size:
+            d = me.head_direction
+            move = dirs[d]
+        elif right < me.size and forward < me.size:
+            d = me.head_direction.rotate_90()
+            move = dirs[d]
+        elif left < me.size and forward < me.size:
+            d = me.head_direction.rotate_90(clockwise=True)
+            move = dirs[d]
+    
+    if type(d) == type(None):
         #move based off state
         #d = G.Astar(me.head, food[0])
         
@@ -153,7 +176,7 @@ def move():
         #option 2: distance-based hunger; more computation
         
         #going with option 1 as a placeholder
-        if me.health < 50:
+        if me.health < 80:
             #me hungy
             params[0] = True
         else:
@@ -172,6 +195,7 @@ def move():
         params_bin = int(params_bin,2)
         
         finite_snake_machine.next_state(params_bin)
+        print(finite_snake_machine.current_state)
         d = finite_snake_machine.current_state.action(G, snakes, me, food)
         
         if d == None:

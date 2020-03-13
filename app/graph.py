@@ -31,6 +31,9 @@ class Loc:
     def dist(self):
         return self.x**2 + self.y**2
     
+    def square_dist(self, l):
+        return np.abs(self.x - self.x) + np.abs(self.y - l.y)
+    
     def rotate_90(self,clockwise=False):
         if clockwise:
             n = -1
@@ -91,9 +94,7 @@ class Graph:
         self.edges = defaultdict(list)
         self.width = W
         self.height = H
-        """
-        give it a matrix representing the map
-        """
+        #TODO: add edge weights        
         
         try:
             if type(args[0]) == np.ndarray:
@@ -108,20 +109,20 @@ class Graph:
     def add_node(self, node):
         self.nodes.add(node)
     
-    def add_edge(self, from_node, to_node):
-        self.edges[from_node].append(to_node)
-        self.edges[to_node].append(from_node)
+    def add_edge(self, from_node, to_node, weight=1):
+        self.edges[from_node].append(Edge(to_node.x,to_node.y,weight))
+        self.edges[to_node].append(Edge(from_node.x,from_node.y,weight))
     
-    def add_node_plus_edges(self,node):
+    def add_node_plus_edges(self, node, weight=1):
         self.nodes.add(node)
         if node.y + 1 < self.height:
-            self.add_edge(node,node+Loc(0,1))
+            self.add_edge(node,node+Loc(0,1),weight)
         if node.y - 1 >= 0:
-            self.add_edge(node,node-Loc(0,1))
+            self.add_edge(node,node-Loc(0,1),weight)
         if node.x + 1 < self.width:
-            self.add_edge(node,node+Loc(1,0))
+            self.add_edge(node,node+Loc(1,0),weight)
         if node.x -1 >= 0:
-            self.add_edge(node,node-Loc(1,0))
+            self.add_edge(node,node-Loc(1,0),weight)
     
     def remove_edge(self, from_node, to_node):
         removed = copy(self)
@@ -211,13 +212,21 @@ class Graph:
         for snake in snakes:
             bodyset = set(snake.body)
             for point in bodyset:
-                if point != snake.tail:
+                if point != snake.tail and point != snake.head:
                     self.delete_node(point)
                     
-            self.delete_node(snake.head+Loc(1,0))
-            self.delete_node(snake.head-Loc(1,0))
-            self.delete_node(snake.head+Loc(0,1))
-            self.delete_node(snake.head-Loc(0,1))
+            for edge in self.edges[snake.head]:
+                edge.w = 50
+                
+            for edge in self.edges[snake.head+snake.head_direction]:
+                edge.w = 50
+            
+            for edge in self.edges[snake.head+snake.head_direction.rotate_90()]:
+                edge.w = 50
+            
+            for edge in self.edges[snake.head+snake.head_direction.rotate_90(clockwise=True)]:
+                edge.w = 50
+            
         
         for point in set(me.body):
             if point != me.head and point != me.tail:
@@ -291,13 +300,13 @@ class Graph:
         openList = []
         closedList = []
         
-        startNode = Node(start.x,start.y)
+        startNode = Node(start.x,start.y,1)
         
         openList.append(startNode)
         
         while len(openList) > 0:
             i += 1
-            if i > (self.width*self.height):
+            if i > (20*self.width*self.height):
                 print("overflow")
                 return None
             current = openList[0]
@@ -322,14 +331,16 @@ class Graph:
             
             children = []
             for node in self.edges[current]:
-                children.append(Node(node.x,node.y,parent=current))
+
+                children.append(Node(node.x,node.y,node.w,parent=current))
             
             for child in children:
                 if child in closedList:
                     continue
                 
-                child.g = current.g + 1
-                child.h = (end - child).dist()
+                #TODO: add edge weights instead of 1, also see if that slows it down too much
+                child.g = current.g + current.weight
+                child.h = (end - child).dist()*child.weight
                 child.f = child.g + child.h
                 
                 if child in openList:
@@ -361,7 +372,7 @@ class Graph:
 #             
 #         for N in self.edges:
 #             for E in self.edges[N]:
-#                 plt.plot([N.x,E.x],[self.height - N.y, self.height - E.y],c='b')
+#                 plt.plot([N.x,E.x],[self.height - N.y, self.height - E.y],c=(E.w/50,0,0.1))
 #                 
 #         
 #         plt.scatter(nlistx,nlisty,c='b')
@@ -374,11 +385,19 @@ class Graph:
 
 
 class Node(Loc):
-    def __init__(self,x,y,parent=None):
+    def __init__(self,x,y,weight,parent=None):
         self.x = x
         self.y = y
+        
+        self.weight = weight
         self.g = 0
         self.h = 0
         self.f = 0
         self.parent = parent
         
+class Edge(Loc):
+    def __init__(self,x,y,weight):
+        
+        self.x = x
+        self.y = y
+        self.w = weight
