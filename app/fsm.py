@@ -268,7 +268,7 @@ class Run(State):
                 #direction away from snake
                 d = me.head - snake.head
         
-        d = G.Astar(me.head, d)
+        d = G.Astar(me.head, me.head + d)
 
 class FSM:
     """

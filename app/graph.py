@@ -32,7 +32,7 @@ class Loc:
         return self.x**2 + self.y**2
     
     def square_dist(self, l):
-        return np.abs(self.x - self.x) + np.abs(self.y - l.y)
+        return np.abs(self.x - l.x) + np.abs(self.y - l.y)
     
     def rotate_90(self,clockwise=False):
         if clockwise:
