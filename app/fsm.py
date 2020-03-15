@@ -5,6 +5,12 @@ Created on Sat Mar  7 11:32:30 2020
 
 @author: byron
 """
+
+try:
+    from app.graph import Loc
+except:
+    from graph import Loc
+
 def chase_tail(G):
     print("ok")
     
@@ -24,7 +30,7 @@ class State:
     def choose(State):
         pass
     
-    def action(self, G, snakes, me, food):
+    def action(self, G, snakes, me, food, to_kill):
         pass
         
 
@@ -34,24 +40,30 @@ class ChaseTail(State):
         self.name = "chase_tail"
     
     def choose(self, params):
-        if (params & 10) == 2 or (params & 14) == 10:
-            #0x1x or 101x
+        if (params & 37) == 4 or (params & 45) == 36:
+            #0xx1x0 or 1x01x0
             #next state: chase tail
             return "chase_tail"
-        elif (params & 7) == 1 or (params & 15) == 5:
-            #x001 0101
+        elif (params & 39) == 2 or (params & 47) == 34:
+            #0xx010 1x0010
             #next state: chase other
             return "chase_other"
-        elif (params & 12) == 12:
-            #11xx
+        elif (params & 41) == 40:
+            #1x1xx0
             #next state: eat
             return "eat"
-        elif (params & 11) == 0 or (params & 7) == 0:
-            #0x00 or x000
+        elif (params & 7) == 0 or (params & 47) == 32:
+            #xxx000 or 1x0000
             #next state: serpentine
             return "serpentine"
+        elif (params & 1) == 1:
+            #xxxxxx1
+            return "run"
+        elif (params & 49) == 16:
+            #01xxx0
+            return "kill"
     
-    def action(self, G,snakes,me,food):
+    def action(self, G,snakes,me,food,to_kill):
         return G.Astar(me.head,me.tail)
 
 class Eat(State):
@@ -60,24 +72,29 @@ class Eat(State):
         self.name = "eat"
     
     def choose(self, params):
-        if (params & 12) == 12:
-            #11xx
-            #next state: eat
+        if (params & 41) == 40:
+            #1x1xx0
             return "eat"
-        if (params & 10) == 2 or (params & 14) == 10:
-            #0x1x or 101x
+        elif (params & 5) == 4  or (params & 61) == 36:
+            #xxx1x0
             #next state: chase tail
             return "chase_tail"
-        if (params & 11) == 1 or (params & 15) == 9:
-            #0x01 1001
+        elif (params & 23) == 2:
+            #x0x010
             #next state: chase other
             return "chase_other"
-        if (params & 11) == 0 or (params & 7) == 0:
-            #0x00 or x000
+        elif (params & 7) == 0 or (params & 47) == 32:
+            #xxx000 or 1x0000
             #next state: serpentine
             return "serpentine"
+        elif (params & 1) == 1:
+            #xxxxxx1
+            return "run"
+        elif (params & 17) == 16:
+            #x1xxx0
+            return "kill"
         
-    def action(self, G,snakes,me,food):
+    def action(self, G,snakes,me,food,to_kill):
         minf = (None,1000)
         for f in food:
             d = G.Astar(me.head,f)
@@ -95,24 +112,30 @@ class ChaseOther(State):
         self.name = "chase_other"
     
     def choose(self, params):
-        if (params & 11) == 1 or (params & 15) == 9:
-            #0x01 or 1001
+        if (params & 7) == 2:
+            #xxx010
             #next state: chase other
             return "chase_other"
-        if (params & 3) == 2 or (params & 11) == 3 or (params & 15) == 11:
-            #xx10 or 0x11 or 1011
+        elif (params & 5) == 4:
+            #xxx1x0 1001x0
             #next state: chase tail
             return "chase_tail"
-        if (params & 12) == 12:
-            #11xx
+        elif (params & 41) == 40:
+            #1x1xx0
             #next state: eat
             return "eat"
-        if (params & 11) == 0 or (params & 7) == 0:
-            #0x00 or x000
+        elif (params & 7) == 0 or (params & 47) == 32:
+            #xxx000 or 1x0000
             #next state: serpentine
             return "serpentine"
+        elif (params & 1) == 1:
+            #xxxxxx1
+            return "run"
+        elif (params & 49) == 16:
+            #01xxx0
+            return "kill"
         
-    def action(self, G,snakes,me,food):
+    def action(self, G,snakes,me,food,to_kill):
         mins = (None,1000)
         for snake in snakes:
             d = G.Astar(me.head,snake.tail)
@@ -131,26 +154,122 @@ class Serpentine(State):
         self.name = "serpentine"
     
     def choose(self, params):
-        if (params & 11) == 0 or (params & 7) == 0:
-            #0x00 or x000
+        if (params & 7) == 0 or (params & 47) == 32:
+            #xxx000 or 1x0000
             #next state: serpentine
             return "serpentine"
-        if (params & 10) == 2 or (params & 15) == 9 or (params & 14) == 10:
-            #0x1x 1001 101x
+        elif (params & 5) == 4:
+            #xxx1x0
             #next state: chase tail
             return "chase_tail"
-        if (params & 12) == 12:
-            #11xx 
+        elif (params & 41) == 40:
+            #1x1xx0
             #next state: eat
             return "eat"
-        if (params & 11) == 1 or (params & 7) == 1:
-            #0x01 x001
+        elif (params & 7) == 2:
+            #xxx010
             #next state: chase_other
             return "chase_other"
+        elif (params & 1) == 1:
+            #xxxxxx1
+            return "run"
+        elif (params & 49) == 16:
+            #01xxx0
+            return "kill"
         
     def action(self, G,snakes,me,food):
-        return G.Astar(me.head, me.tail)
+        return G.Astar(me.head, me.tail,to_kill)
             
+    
+class Kill(State):
+    
+    def __init__(self):
+        self.name = "kill"
+        
+    def choose(self, params):
+        if (params & 7) == 0 or (params & 47) == 32:
+            #xxx000 or 1x0000
+            #next state: serpentine
+            return "serpentine"
+        elif (params & 5) == 4:
+            #xxx1x0
+            #next state: chase tail
+            return "chase_tail"
+        elif (params & 41) == 40:
+            #1x1xx0
+            #next state: eat
+            return "eat"
+        elif (params & 23) == 2:
+            #x0x010
+            #next state: chase_other
+            return "chase_other"
+        elif (params & 1) == 1:
+            #xxxxxx1
+            return "run"
+        elif (params & 17) == 16:
+            #x1xxx0
+            return "kill"
+        
+        def action(self, G,snakes,me,food,to_kill):
+            
+            to_check = to_kill.head_direction.rotate_90()*2
+            if to_check in G:
+                return G.Astar(me.head, to_check)
+            to_check += to_kill.head_direction
+            if to_check in G:
+                return G.Astar(me.head, to_check)
+            to_check += to_kill.head_direction
+            if to_check in G:
+                return G.Astar(me.head, to_check)
+            to_check = to_kill.head_direction.rotate_90() + to_kill.head_direction*2
+            if to_check in G:
+                return G.Astar(me.head, to_check)
+            to_check = to_kill.head_direction*2
+            if to_check in G:
+                return G.Astar(me.head, to_check)
+        
+
+class Run(State):
+    
+    def __init__(self):
+        self.name = "run"
+    
+    def choose(self, params):
+        if (params & 7) == 0 or (params & 47) == 32:
+            #xxx000 or 1x0000
+            #next state: serpentine
+            return "serpentine"
+        elif (params & 5) == 4:
+            #xxx1x0
+            #next state: chase tail
+            return "chase_tail"
+        elif (params & 41) == 40:
+            #1x1xx0
+            #next state: eat
+            return "eat"
+        elif (params & 23) == 2:
+            #x0x010
+            #next state: chase_other
+            return "chase_other"
+        elif (params & 1) == 1:
+            #xxxxxx1
+            return "run"
+        elif (params & 17) == 16:
+            #x1xxx0
+            return "kill"
+        
+    
+    def action(self, G,snakes,me,food,to_kill):
+        #find a safe place to *DUN DUN* RUN AWAY
+        
+        #TODO: make this better
+        for snake in snakes:
+            if me.head.square_dist(snake.head) == 2:
+                #direction away from snake
+                d = me.head - snake.head
+        
+        d = G.Astar(me.head, d)
+
 class FSM:
     """
     FSM class hard coded for my snake. ssss.
@@ -159,7 +278,9 @@ class FSM:
         self.states = {"serpentine":Serpentine(),
                        "chase_tail":ChaseTail(),
                        "chase_other":ChaseOther(),
-                       "eat":Eat()}
+                       "eat":Eat(),
+                       "kill":Kill(),
+                       "run":Run()}
         
         #initialize state
         self.current_state = self.states["chase_tail"]
@@ -174,15 +295,14 @@ if __name__=='__main__':
     import itertools
     #test for chase_tail
     fsm = FSM()
-    fsm.current_state = fsm.states['chase_tail']
+    fsm.current_state = fsm.states['run']
     
-    lst = list(itertools.product([0, 1], repeat=4))
+    lst = list(itertools.product([0, 1], repeat=6))
     
     errors = []
     
-    for i in range(16):
+    for i in range(64):
         resp = fsm.current_state.choose(i)
-        print(i)
         if type(resp) == type(None):
             errors.append(bin(i))
 # =============================================================================

@@ -49,6 +49,9 @@ class Loc:
     def __sub__(self, L):
         return Loc(self.x - L.x, self.y - L.y)
     
+    def __mul__(self, a):
+        return Loc(self.x*a,self.y*a)
+    
     def __str__(self):
         return("Loc(%d,%d)"%(self.x,self.y))
 
@@ -306,7 +309,7 @@ class Graph:
         
         while len(openList) > 0:
             i += 1
-            if i > (20*self.width*self.height):
+            if i > (1.5*self.width*self.height):
                 print("overflow")
                 return None
             current = openList[0]
@@ -348,6 +351,47 @@ class Graph:
                         continue
                 
                 openList.append(child)
+                
+    def long_path(self, start, direction):
+        
+        Q = Queue.Queue()
+        Q.put(start+direction)
+        visited = [start, start+direction]
+        
+        move_dir = direction
+
+        while not Q.empty():
+            current = Q.get()
+            
+            if current+move_dir in self.edges[current]:
+                Q.put(current+move_dir)
+                continue
+            
+            
+                
+            next_node = self.edges[current]
+            
+            for E in self.edges[current]:
+                
+                if E not in visited :
+                    Q.put(E)
+            
+        
+    def split(self,A,B):
+        wh = B - A
+        G_p = Graph(wh.x,wh.y)
+        
+        for n in self.nodes:
+            if n.x > A.x and n.x < B.x and n.y > A.y and n.y < B.y: 
+                G_p.nodes.add(n)
+        
+        for n in G_p.nodes:
+            G_p.edges[n] = self.edges[n]
+            
+        
+        return G_p
+        
+        
         
     def _zero(self):
 
@@ -361,8 +405,8 @@ class Graph:
             if N.y + 1 < self.height:
                 self.add_edge(N,N+Loc(0,1))
 
-        
 # =============================================================================
+#         
 #     def _plot(self):
 #         nlistx = []
 #         nlisty = []
@@ -370,8 +414,9 @@ class Graph:
 #             nlistx.append(N.x)
 #             nlisty.append(self.height - N.y)
 #             
-#         for N in self.edges:
+#         for N in self.nodes:
 #             for E in self.edges[N]:
+#                 print(N,E)
 #                 plt.plot([N.x,E.x],[self.height - N.y, self.height - E.y],c=(E.w/50,0,0.1))
 #                 
 #         

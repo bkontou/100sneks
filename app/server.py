@@ -128,6 +128,8 @@ def move():
     G.build_from_data(snakes, me)
     
     d = None
+    #state parameters
+    params = [0,0,0,0,0,0]
     
     #approaching wall
     forward = G.floodfill(me.head, me.head_direction)
@@ -135,11 +137,16 @@ def move():
     right = G.floodfill(me.head,me.head_direction.rotate_90(clockwise=True))
     
     for snake in snakes:
-        if me.head.square_dist(snake.head) == 2 and me.size > snake.size:
-            #we can go head to freakin head
-            d = G.Astar(me.head,snake.head)
-            move = dirs[d[1]-d[0]]
-            break
+        if me.head.square_dist(snake.head) == 2:
+            #snake head in the freaking way
+            if finite_snake_machine.current_state.name != 'kill':
+                params[5] = True
+            if me.size > snake.size:
+                #we can go head to freakin head
+                d = G.Astar(me.head,snake.head)
+                move = dirs[d[1]-d[0]]
+                break
+            
         
     #TODO: figure out how to get this to work: approaching wall shit
     if right+left+forward < 3*me.size:
@@ -169,34 +176,44 @@ def move():
         #d = G.Astar(me.head, food[0])
         
         #assess situation
-        params = [0,0,0,0]
         
         #TODO: how to check if hungry
         #Option 1: threshold hunger level; less computation
         #option 2: distance-based hunger; more computation
         
         #going with option 1 as a placeholder
-        if me.health < 80:
+        if me.health < 50:
             #me hungy
             params[0] = True
         else:
             params[0] = False
+            
+        to_kill = None
+        if me.health >= 50:
+            for snake in snakes:
+                if G.floodfind(me.head,snake.head):
+                    params[1] = True
+                    to_kill = snake
         
         #food available
-        params[1] = G.floodfind(me.head,food)
+        params[2] = G.floodfind(me.head,food)
         #tail available
-        params[2] = G.floodfind(me.head,me.tail)
+        params[3] = G.floodfind(me.head,me.tail)
         #other available
-        params[3] = G.floodfind(me.head,[s.tail for s in snakes])
+        params[4] = G.floodfind(me.head,[s.tail for s in snakes])
+        
         
         #put into binary string
-        params_bin = str(int(params[0]))+str(int(params[1]))+str(int(params[2]))+str(int(params[3]))
+        params_bin = str(int(params[0]))+str(int(params[1]))+str(int(params[2]))+str(int(params[3]))+str(int(params[4]))+str(int(params[5]))
         #turn binary string into respective base 10 number
+        print(params_bin)
         params_bin = int(params_bin,2)
         
         finite_snake_machine.next_state(params_bin)
         print(finite_snake_machine.current_state)
-        d = finite_snake_machine.current_state.action(G, snakes, me, food)
+        
+        #take action
+        d = finite_snake_machine.current_state.action(G, snakes, me, food, to_kill)
         
         if d == None:
             #find tail

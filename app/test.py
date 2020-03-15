@@ -61,3 +61,22 @@ elif right < size and forward < size:
     print("go left")
 elif left < size and forward < size:
     print("go right")
+    
+#%%
+    
+import graph
+from graph import Loc
+    
+def split(G,A,B):
+    wh = B - A
+    G_p = graph.Graph(wh.x,wh.y)
+    
+    for n in G.nodes:
+        if n.x > A.x and n.x < B.x and n.y > A.y and n.y < B.y: 
+            G_p.nodes.add(n)
+    
+    for n in G_p.nodes:
+        G_p.edges[n] = G.edges[n]
+        
+    
+    return G_p
