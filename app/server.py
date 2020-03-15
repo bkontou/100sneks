@@ -131,6 +131,17 @@ def move():
     #state parameters
     params = [0,0,0,0,0,0]
     
+    #init fsm
+    ### Back code to make the fsm work with the following code
+    finite_snake_machine = FSM()
+    to_kill = None
+    if me.health >= 50:
+        for snake in snakes:
+            if G.floodfind(me.head,snake.head):
+                params[1] = True
+                finite_snake_machine.current_state = finite_snake_machine.states['kill']
+                to_kill = snake
+    
     #approaching wall
     forward = G.floodfill(me.head, me.head_direction)
     left = G.floodfill(me.head,me.head_direction.rotate_90())
@@ -188,12 +199,6 @@ def move():
         else:
             params[0] = False
             
-        to_kill = None
-        if me.health >= 50:
-            for snake in snakes:
-                if G.floodfind(me.head,snake.head):
-                    params[1] = True
-                    to_kill = snake
         
         #food available
         params[2] = G.floodfind(me.head,food)
