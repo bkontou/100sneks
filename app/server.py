@@ -135,6 +135,8 @@ def move():
     ### Back code to make the fsm work with the following code
     finite_snake_machine = FSM()
     to_kill = None
+    to_run = None
+
     if me.health >= 50:
         for snake in snakes:
             if G.floodfind(me.head,snake.head):
@@ -147,11 +149,12 @@ def move():
     left = G.floodfill(me.head,me.head_direction.rotate_90())
     right = G.floodfill(me.head,me.head_direction.rotate_90(clockwise=True))
     
+    snakes_near_me = []
+    
     for snake in snakes:
         if me.head.square_dist(snake.head) == 2:
             #snake head in the freaking way
-            if finite_snake_machine.current_state.name != 'kill':
-                params[5] = True
+            snakes_near_me.append(snake)
             if me.size > snake.size:
                 #we can go head to freakin head
                 d = G.Astar(me.head,snake.head)
@@ -219,6 +222,13 @@ def move():
         
         #take action
         d = finite_snake_machine.current_state.action(G, snakes, me, food, to_kill)
+        
+        #check if im running into danger:
+        for snake in snakes_near_me:
+            if snake.head.square_dist(d[len(d)-1]) == 2:
+                #run
+                
+                
         
         if d == None:
             #find tail
